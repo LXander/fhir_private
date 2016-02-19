@@ -53,8 +53,8 @@ def set():
     length = len(class_list)
     if form.validate_on_submit():
         sp.set_mask(form,e,reserved_word,fieldname)
-        return render_template('temp.html')
-    return render_template('bt.html',class_list=class_list,form =form,length = length,
+        return render_template('temp.html',form= form)
+    return render_template('btt.html',class_list=class_list,form =form,length = length,len = len,
                            str = str,getattr= getattr,fieldname = fieldname,word_len=len(reserved_word),reserved_word = reserved_word)
 
 

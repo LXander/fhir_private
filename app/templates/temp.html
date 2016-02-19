@@ -7,5 +7,13 @@
 <body>
 
 <p>see the result in console</p>
+
+{% for field in form  %}
+<p>{{ field.name  }} <br>
+    {{ field.id }} <br>
+    {{ field.data }}
+</p>
+{% endfor %}
+
 </body>
 </html>
