@@ -1,0 +1,33 @@
+<html>
+<head>
+
+    <link href="{{ url_for('.static', filename = 'css/materialize.min.css') }}" rel="stylesheet" media="screen">
+
+
+    {% if title %}
+    <title>{{ title }} - demo</title>
+    {% else %}
+    <title>demo</title>
+    {% endif %}
+</head>
+<body>
+<div>Result: <a href="/index">Home</a></div>
+<hr>
+<!--
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul>
+    {% for message in messages %}
+        <li>{{ message }} </li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+-->
+{% block content %}{% endblock %}
+
+        <script src="{{ url_for('.static', filename = 'js/materialize.min.js') }}"></script>
+        <script src="{{ url_for('.static', filename = 'https://code.jquery.com/jquery-2.1.1.min.js') }}"></script>
+
+</body>
+</html>

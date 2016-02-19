@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Hi,  Dear Doctor !</h1>
+    <div>
+    	You want to see the following item about the patient:
+    	{% for item in form %}
+    		{% if item.type == "BooleanField"  %}
+                {% if item.data == True %}
+    			<p>User's {{item.label}}</p>
+                
+                {% endif %}
+    		{% endif %}
+    	{% endfor %}
+   <!--
+    {% for post in posts %}
+    <div><p>{{ post.author.nickname }} says: <b>{{ post.body }}</b></p></div>
+    {% endfor %}
+    -->
+{% endblock %}
