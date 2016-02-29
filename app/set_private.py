@@ -20,6 +20,7 @@ class json_struct:
         self.type = type
         self.key = key
         self.value = value
+        self.attr = None
 
     def dump(self,level):
         if self.type == 'value':
@@ -134,7 +135,28 @@ class json_struct:
     def get_pos_list(self):
         return self.pos_list
 
+    def get_type(self):
+        return self.type
+
+    def set_attr(self,attr):
+        self.attr = attr
+
+    def get_attr(self):
+        return self.attr
+
+    def set_content(self,content):
+        self.content = content
+
+    def get_content(self):
+        return self.content
+
+
 def built(target):
+    """
+    transfer dict into json_struct class
+    :param target:Dict file loads from json
+    :return:list of json_struct class
+    """
     if type(target) == str or type(target) == unicode:
         return target
     elif type(target) == dict:
@@ -152,9 +174,29 @@ def built(target):
         return li
 
 
+def level_lift(target):
+    target.level -= 1;
+    if target.value:
+        map(lambda x:level_lift(x),target.value)
+
+def display_reduce(target):
+    if target.type=='temp' and len(target.value)==1:
+        target.set_attr('nondisplay_temp')
+        if target.value:
+            map(lambda x:level_lift(x),target.value)
+
+
+    if target.value:
+        map(lambda x:display_reduce(x),target.value)
 
 
 def get_struct(target,reserved_word):
+    """
+    build main json_struct class from input dict
+    :param target: dict, the result of json.loads
+    :param reserved_word:mid-layer:
+    :return:json_struct class
+    """
     output = json_struct('main','main',[])
     for line in target:
         build(line,output)
@@ -162,8 +204,10 @@ def get_struct(target,reserved_word):
 
 
 def build(target,body):
+
     item = reduce(lambda x,y: x.set_by_key(y),target,body)
     item.value = None
+
 
 
 
@@ -205,9 +249,13 @@ def strcture_json(json_file,reserved_word,fieldname):
 
     map(lambda x:x.set_level(0),output.value)
 
+    #map(lambda x:display_reduce(x),output.value)
+
     num = 0
     for item in output.value:
         num = item.dfs(num)
+
+
 
 
 
@@ -218,7 +266,6 @@ def strcture_json(json_file,reserved_word,fieldname):
 
     dict_temp = []
     for item in class_list:
-
         dict_temp.append([item.get_key(),item])
 
 
@@ -244,11 +291,11 @@ def strcture_json(json_file,reserved_word,fieldname):
 
     form = private_Form()
 
-    for item in class_list:
-        print '\t'*item.get_level()+item.get_key()
+   # for item in class_list:
+   #    print '\t'*item.get_level()+item.get_key()
 
-    for item in class_list:
-        print str(item.get_level())+'\t'+str(item.get_pred())
+   # for item in class_list:
+   #     print str(item.get_level())+'\t'+str(item.get_pred())
 
 
 
@@ -263,19 +310,66 @@ def is_prefix(list1,list2):
     return True
 
 
+
+def package(json_file,masked_part):
+
+    masked = json.dumps(masked_part)
+    new_dict = {}
+    if 'id' in json_file :
+        new_dict['id'] = json_file['id']
+
+    if 'resourceType' in json_file:
+        new_dict['resourceType'] = json_file['resourceType']
+
+    if 'resourceID' in json_file:
+        new_dict['resourceID'] = json_file['resourceID']
+
+    new_dict['Policy'] = masked_part
+
+    return json.dumps(new_dict)
+
+
 def set_mask(form,json_file,reserved_word,fieldname):
+    """
+
+    :param form: Contains item which user wanted to hind
+    :param json_file: Original json file
+    :param reserved_word:
+    :param fieldname:
+    :return:
+    """
+
     length = len(fieldname)
     json_list,json_class = get_list_and_class(json_file, reserved_word)
+    masked_list = []
     for field in form:
         if field.type == "BooleanField" and field.data == True:
             templist = json_class[int(str(field.id)[length:])].get_pos_list()
             for item in json_list:
                 if is_prefix(templist,item):
                     item[-1] = 'mask'
+                    if not item in masked_list:
+                        masked_list.append(item)
+
 
     j = jd.list2json(json_list,reserved_word)
 
-    print json.dumps(j)
+    print reserved_word
+    for line in masked_list:
+        print line
+    masked_part = jd.list2json(masked_list,reserved_word)
+    print masked_part
+
+
+
+
+    final_file = package(json_file,masked_part)
+
+
+
+
+
+    print json.dumps(masked_part,indent=4)
 
 
 reserved_word = 'test'

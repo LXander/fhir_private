@@ -19,7 +19,7 @@
 <hr>
 
 <form name = "form" action="" method="post" name="private">
-    <div class="card">
+    <div class="card" style = "margin-left: 10%;margin-right: 10%">
                 <div class="card-content">
 
     {{ form.hidden_tag() }}
@@ -27,33 +27,49 @@
     {% for i in range(length) %}
 
 
-        {% if  class_list[i].get_level()>class_list[i].get_pred() %}
-            <div class="panel panel-default" id ="{{'panel'+str(i-1)}}" >
-                <div class="panel-body">
-                    <p>  <input id="{{ getattr(form,fieldname+str(i)).id }}" name="{{ getattr(form,fieldname+str(i)).name }}" type="checkbox" value="y" onchange="change_status(this)">    <label for= "{{ fieldname+str(i) }}" >Hide </label>  </p>
-                    {% if not class_list[i].get_key()[:word_len]==reserved_word %}
-                    <p> {{ class_list[i].get_key()}}  </p>
-                    {% endif %}
+
+
+                    {% if  class_list[i].get_level()>class_list[i].get_pred() %}
+                        <div class="panel panel-default" name="panel" id ="{{'panel'+str(i-1)}}" >
+                        <div class="panel-body">
+                        {% if not class_list[i].get_type()=="value" %}
+                        <p>  <input id="{{ getattr(form,fieldname+str(i)).id }}" name="{{ getattr(form,fieldname+str(i)).name }}" type="checkbox" value="y" onchange="change_status(this)">
+                        {% endif %}
+                        {% if not class_list[i].get_key()[:word_len]==reserved_word %}
+                        {{ class_list[i].get_key()}}
+                        {% endif %}
+
+                        </p>
 
 
                     {% elif class_list[i].get_level()==class_list[i].get_pred() %}
-                    <p>  <input id="{{ getattr(form,fieldname+str(i)).id }}" name="{{ getattr(form,fieldname+str(i)).name }}" type="checkbox" value="y" onchange="change_status(this)">     <label for= "{{ fieldname+str(i) }}" >Hide </label>  </p>
-                    {% if not class_list[i].get_key()[:word_len]==reserved_word %}
-                    <p> {{ class_list[i].get_key()}}  </p>
-                    {% endif %}
+
+                        {% if not class_list[i].get_type()=="value" %}
+                        <p>  <input id="{{ getattr(form,fieldname+str(i)).id }}" name="{{ getattr(form,fieldname+str(i)).name }}" type="checkbox" value="y" onchange="change_status(this)">
+                        {% endif %}
+                        {% if not class_list[i].get_key()[:word_len]==reserved_word %}
+                        {{ class_list[i].get_key()}}
+                        {% endif %}
+                        </p>
 
 
                     {% elif class_list[i].get_level()< class_list[i].get_pred() %}
-                     {% for i in range(class_list[i].get_pred()-class_list[i].get_level())%}
+                        {% for i in range(class_list[i].get_pred()-class_list[i].get_level())%}
+                            </div>
                         </div>
-                    </div>
-                    {% endfor %}
+                        {% endfor %}
 
-                    <p>  <input id="{{ getattr(form,fieldname+str(i)).id }}" name="{{ getattr(form,fieldname+str(i)).name }}" type="checkbox" value="y" onchange="change_status(this)">     <label for= "{{ fieldname+str(i) }}" >Hide </label>  </p>
-                    {% if not class_list[i].get_key()[:word_len]==reserved_word %}
-                    <p> {{ class_list[i].get_key()}}  </p>
+                        {% if not class_list[i].get_type()=="value" %}
+                        <p>  <input id="{{ getattr(form,fieldname+str(i)).id }}" name="{{ getattr(form,fieldname+str(i)).name }}" type="checkbox" value="y" onchange="change_status(this)">
+                        {% endif %}
+                        {% if not class_list[i].get_key()[:word_len]==reserved_word %}
+                        {{ class_list[i].get_key()}}
+                        {% endif %}
+                        </p>
                     {% endif %}
-                    {% endif %}
+
+
+
 
     {% endfor %}
      {% for _ in range(class_list[-1].get_level()+1) %}
@@ -82,15 +98,29 @@ var change_status = function(obj){
 
 
     var target = document.getElementById(id)
-    if (target!=null){
-        if(obj.checked){
-            target.style.display = "none"
-        }else{
-            target.style.display = ""
+        if (target!=null){
+            if(obj.checked){
+                target.style.display = "none"
+            }else {
+                target.style.display = ""
+            }
         }
 
 
+
+    var boxes = document.getElementById(id).getElementsByTagName("input")
+    for (var i = 0;i<boxes.length;i++)
+    {
+        if(boxes[i].type=='checkbox')
+        {
+            boxes[i].checked = obj.checked
+            change_status(boxes[i])
+
+        }
     }
+
+
+
 
 }
 </script>

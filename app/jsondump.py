@@ -302,7 +302,7 @@ def simplejsontest():
     testlist.append([u'name', 'parallel_dict1', u'given', 'parallel_dict0', u'Jim'])
 
 
-    result = list2json(testlist)
+    result = list2json(testlist,'parallel_dict')
 
     print json.dumps(result,indent=4)
 
@@ -310,16 +310,24 @@ def simplejsontest():
 
 
 
+def newtest():
+    testlist = []
+    testlist.append([u'name', 'test0', u'use', 'mask'])
+    testlist.append([u'name', 'test0', u'given', 'test0', 'mask'])
+    testlist.append([u'name', 'test0', u'family', 'test0', 'mask'])
+    testlist.append([u'contact', 'test0', u'relationship', 'test0', u'coding', 'test0', u'code', 'mask'])
+    testlist.append([u'contact', 'test0', u'relationship', 'test0', u'coding', 'test0', u'system', 'mask'])
+    testlist.append([u'link', 'test0', u'type', 'mask'])
 
-
-
+    result = list2json(testlist,'test')
+    print json.dumps(result,indent=4)
 
 
 
 
 if __name__ == '__main__':
-    test()
+    #test()
     #jsontest()
-    #simplejsontest()
-
+    simplejsontest()
+    newtest()
 
