@@ -4,6 +4,7 @@
 <head>
 
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/bootstrap.min.css') }}">
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/tabber.css') }}">
     <style type="text/css">
         .row{border-top:1px solid #eeeeee}
         .row:first-child{border-top: None}
@@ -30,18 +31,43 @@
 <div>Result: <a href="/index">Home</a></div>
 <hr>
 
+
+
+
 <form name = "form" action="" method="post" name="private">
-    <div class="card" style = "margin-left: 10%;margin-right: 10%">
-                <div class="card-content">
+
+    <div class="hashTabber-sandstone-wrapper" >
+                <ol class="hashTabber-nav hashTabber-sandstone" data-hashtabber-id="fhir_form">
+                    {% for i in range(length) %}
+                        {% if class_list[i].get_level()==0 %}
+                            <li data-hashtabber-pair="{{  'fhir_'+class_list[i].get_key() }}" class>
+                                <a href="#fhir_form={{ 'fhir_'+class_list[i].get_key() }}">{{ class_list[i].get_key() }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                </ol>
+
+
+
+
+
+
 
     {{ form.hidden_tag() }}
+
+                <ol class="hashTabber-data hashTabber-sandstone" data-hashtabber-id="fhir_form">
 
     {% for i in range(length) %}
 
 
 
+
+
                     {% if i==0  %}
+
                         <!-- when i=0 class_list[i-1] get the last element in class_list -->
+                         <li data-hashtabber-pair="{{ 'fhir_'+class_list[i].get_key() }}" class>
                         <div class="panel panel-default " name="panel" id ="panel_basic" >
                         <div class="panel-body">
 
@@ -55,6 +81,10 @@
                             </div>
                         </div>
                         {% endfor %}
+                        {% if i and class_list[i].get_level()==0 %}
+                            </li>
+                            <li data-hashtabber-pair="{{ 'fhir_'+class_list[i].get_key() }}" class>
+                        {% endif %}
 
 
                     {% endif %}
@@ -83,17 +113,19 @@
 
 
     {% endfor %}
-     {% for _ in range(class_list[-1].get_level()+1) %}
+     {% for _ in range(class_list[-1].get_level()) %}
         </div>
     </div>
 
     {% endfor %}
 
+        </ol>
 
+    </div>
         <input class="btn btn-default" type="submit" value="Submit">
 
-    </div>
-    </div>
+
+
 
 
 </form>
@@ -102,9 +134,30 @@
 
 <script type="text/javascript">
 
+    function projectInterface() {
+    // --------------------------------------------------
+    // declare a public run function
+    // with all private stuff initialized inside of it
+    // --------------------------------------------------
+
+    this.run = run;
+    function run() {
+        var tabber = new HashTabber();
+        tabber.run();
+    }
+
+}
+
+    var hashTabberSoundsLikeDrugs = new projectInterface();
+// run functions
+hashTabberSoundsLikeDrugs.run();
+
+
 
 
 var change_status = function(obj){
+
+
 
     var name = obj.name
     var id = 'panel'+name.substring({{ len(fieldname) }})
@@ -137,6 +190,8 @@ var change_status = function(obj){
 
 }
 </script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/hashTabber.js') }}"></script>
+
 <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-2.1.1.min.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/js/bootstrap.min.js') }}"></script>
 </body>

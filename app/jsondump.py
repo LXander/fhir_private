@@ -10,10 +10,17 @@ formtable = {"name":[u'name'],
              "contact":[u'contact'],
              "address":[u'address']}
 
-def is_reserved_layer(dict,reserved_word):
-    for key in dict:
-        if reserved_word == key[:len(reserved_word)]:
-            return True
+def is_reserved_layer(source, reserved_word):
+    """
+    reserved_layer's key is named as reserved_word+{num}
+    
+    :param reserved_word:
+    :return:
+    """
+    if type(source) == dict:
+        for key in source:
+            if reserved_word == key[:len(reserved_word)]:
+                return True
     return False
 
 def json_reduce_layer(source,reserved_word):
@@ -21,7 +28,12 @@ def json_reduce_layer(source,reserved_word):
         if is_reserved_layer(source[0],reserved_word):
             temp_dict = source.pop();
             for temp_key in temp_dict:
-                source.append(temp_dict[temp_key][0])
+                if type(temp_dict[temp_key])==list:
+                    print temp_dict[temp_key]
+                    print type(temp_dict[temp_key])
+                    source.append(temp_dict[temp_key][0])
+                else:
+                    source.append(temp_dict[temp_key])
             for item in source:
                 json_reduce_layer(item,reserved_word)
         else:
@@ -55,16 +67,16 @@ def json_reduce_layer(source, reserved_word):
 '''
 
 
-def json_reduce_structure(source):
+def json_reduce_structure(source,reserved_word):
     if type(source)==dict:
         for key in source:
-            if(type(source[key])==list and len(source[key])==1):
+            if(type(source[key])==list and len(source[key])==1 and not is_reserved_layer(source[key][0],reserved_word)):
                 source[key] = source[key][0]
-                json_reduce_structure(source[key])
+            json_reduce_structure(source[key],reserved_word)
     elif type(source)==list:
         for item in source:
             if(type(item)==dict):
-                json_reduce_structure(item)
+                json_reduce_structure(item,reserved_word)
 
 def json_write(source,list,reserved_word):
     if(len(source)==1):
@@ -95,8 +107,13 @@ def list2json(source,reserved_word):
 
     dest = json_gene(source,reserved_word)
 
+
+
+    json_reduce_structure(dest,reserved_word)
     json_reduce_layer(dest,reserved_word)
-    json_reduce_structure(dest)
+
+
+
 
     return dest
 
@@ -320,7 +337,15 @@ def newtest():
     testlist.append([u'link', 'test0', u'type', 'mask'])
 
     result = list2json(testlist,'test')
-    print json.dumps(result,indent=4)
+    #print json.dumps(result,indent=4)
+
+    #print json.dumps(jp.simple,indent=4)
+
+    new = list2json(json2list(jp.s,'test'),'test')
+
+    print json.dumps(new,indent=4)
+
+
 
 
 
@@ -328,6 +353,6 @@ def newtest():
 if __name__ == '__main__':
     #test()
     #jsontest()
-    simplejsontest()
+    #simplejsontest()
     newtest()
 

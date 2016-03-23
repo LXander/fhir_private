@@ -1,9 +1,10 @@
 from flask import render_template, flash, redirect
 from app import app
 from .forms import LoginForm
+from forms import set_patient_from_and_class
 import jsonexample as jp
 import set_private as sp
-
+import private_extrace as pe
 
 @app.route('/index')
 def index():
@@ -46,7 +47,7 @@ def login():
 
 @app.route('/patient',methods=['GET','POST'])
 def set():
-    e = jp.simple
+    e = jp.s
     reserved_word = 'test'
     fieldname = 'fieldname'
     class_list,class_dict,form = sp.strcture_json(e,reserved_word,fieldname)
@@ -56,6 +57,16 @@ def set():
         return render_template('temp.html',form= form)
     return render_template('btt.html',class_list=class_list,form =form,length = length,len = len,
                            str = str,getattr= getattr,fieldname = fieldname,word_len=len(reserved_word),reserved_word = reserved_word)
+
+
+@app.route('/patient_test',methods=['GET','POST'])
+def set_form():
+    e = jp.s
+    patient_info_form,patient_info_class = set_patient_from_and_class(e)
+    if patient_info_form.validate_on_submit():
+        return render_template('temp.html',form= patient_info_form)
+    return render_template('private_set.html',form = patient_info_form,patient_info = patient_info_class)
+
 
 
 @app.route('/private_submit',methods=['GET','POST'])

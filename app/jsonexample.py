@@ -1,12 +1,12 @@
 import json
 import requests
 
-r = requests.get('http://www.hl7.org/implement/standards/fhir/patient-example-a.json')
+#r = requests.get('http://www.hl7.org/implement/standards/fhir/patient-example-a.json')
 
 
 
 
-example = r.json()
+#example = r.json()
 
 s = json.loads('''
   {
@@ -163,12 +163,25 @@ s = json.loads('''
 )
 
 p = json.loads('''
-{"name":
-    [
+{"name":[
         {
-            "use": ["show"],
-            "given": ["mask"],
-            "family": ["show"]
+            "fhir_comments":[
+                " Peter James Chalmers, but called 'Jim' "
+            ],
+            "use":"official",
+            "family":[
+                "Chalmers"
+            ],
+            "given":[
+                "Peter",
+                "James"
+            ]
+        },
+        {
+            "use":"usual",
+            "given":[
+                "Jim"
+            ]
         }
     ]
 }
@@ -297,3 +310,5 @@ simple = json.loads('''
 }
 '''
 )
+
+example = simple

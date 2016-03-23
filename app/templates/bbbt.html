@@ -4,19 +4,7 @@
 <head>
 
     <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/bootstrap.min.css') }}">
-    <style type="text/css">
-        .row{border-top:1px solid #eeeeee}
-        .row:first-child{border-top: None}
-        p{margin:10px 0 10px 0}
-        p.fhir-value {
-            width: 100%;
-            display: inline-block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-}
 
-    </style>
 
     {% if title %}
     <title>{{ title }} - demo</title>
@@ -40,14 +28,29 @@
 
 
 
-                    {% if i==0  %}
-                        <!-- when i=0 class_list[i-1] get the last element in class_list -->
-                        <div class="panel panel-default " name="panel" id ="panel_basic" >
-                        <div class="panel-body">
 
-                    {% elif  class_list[i].get_level()>class_list[i].get_pred() %}
-                        <div class="panel panel-default " name="panel" id ="{{'panel'+str(class_list[i-1].get_seq())}}" >
+                    {% if  class_list[i].get_level()>class_list[i].get_pred() %}
+                        <div class="panel panel-default" name="panel" id ="{{'panel'+str(i-1)}}" >
                         <div class="panel-body">
+                        {% if not class_list[i].get_type()=="value" %}
+                        <p>  <input id="{{ getattr(form,fieldname+str(i)).id }}" name="{{ getattr(form,fieldname+str(i)).name }}" type="checkbox" value="y" onchange="change_status(this)">
+                        {% endif %}
+                        {% if not class_list[i].get_key()[:word_len]==reserved_word %}
+                        {{ class_list[i].get_key()}}
+                        {% endif %}
+
+                        </p>
+
+
+                    {% elif class_list[i].get_level()==class_list[i].get_pred() %}
+
+                        {% if not class_list[i].get_type()=="value" %}
+                        <p>  <input id="{{ getattr(form,fieldname+str(i)).id }}" name="{{ getattr(form,fieldname+str(i)).name }}" type="checkbox" value="y" onchange="change_status(this)">
+                        {% endif %}
+                        {% if not class_list[i].get_key()[:word_len]==reserved_word %}
+                        {{ class_list[i].get_key()}}
+                        {% endif %}
+                        </p>
 
 
                     {% elif class_list[i].get_level()< class_list[i].get_pred() %}
@@ -56,28 +59,14 @@
                         </div>
                         {% endfor %}
 
-
-                    {% endif %}
-
-                    <div class="row {% if class_list[i].get_attr()=='fold' %} fold {% else %} norm {% endif %}">
                         {% if not class_list[i].get_type()=="value" %}
-                        <p  class="col-sm-3"  >  <input id="{{ getattr(form,fieldname+str(class_list[i].get_seq())).id }}" name="{{ getattr(form,fieldname+str(class_list[i].get_seq())).name }}" type="checkbox" value="y" onchange="change_status(this)">
+                        <p>  <input id="{{ getattr(form,fieldname+str(i)).id }}" name="{{ getattr(form,fieldname+str(i)).name }}" type="checkbox" value="y" onchange="change_status(this)">
                         {% endif %}
                         {% if not class_list[i].get_key()[:word_len]==reserved_word %}
                         {{ class_list[i].get_key()}}
                         {% endif %}
-
-
                         </p>
-                        {%  if class_list[i].get_attr()=='key_of_value' %}
-
-                            <div class="col-sm-9">
-                                {% for j in range(len(class_list[i].data)) %}
-                                     <div class="row"><div class="col-sm-12"><p class="fhir-value">{{  class_list[i].data[j]}}</p></div></div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        </div>
+                    {% endif %}
 
 
 
@@ -89,9 +78,7 @@
 
     {% endfor %}
 
-
-        <input class="btn btn-default" type="submit" value="Submit">
-
+     <p><input type="submit" value="Submit"></p>
     </div>
     </div>
 

@@ -30,11 +30,11 @@
         {% if  class_list[i].get_level()>class_list[i].get_pred() %}
             <div class="panel panel-default" id ="{{'panel'+str(i-1)}}" >
                 <div class="panel-body">
+
                     <p>  <input id="{{ getattr(form,fieldname+str(i)).id }}" name="{{ i }}" type="checkbox" value="y" onchange="change_status(this)">    <label for= "{{ fieldname+str(i) }}" >Hide </label>  </p>
                     {% if not class_list[i].get_key()[:word_len]==reserved_word %}
                     <p> {{ class_list[i].get_key()}}  </p>
                     {% endif %}
-
 
                     {% elif class_list[i].get_level()==class_list[i].get_pred() %}
                     <p>  <input id="{{ getattr(form,fieldname+str(i)).id }}" name="{{ i }}" type="checkbox" value="y" onchange="change_status(this)">    <label for= "{{ fieldname+str(i) }}" >Hide </label>  </p>

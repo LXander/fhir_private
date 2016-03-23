@@ -9,18 +9,21 @@ import json
 #reserved_word = 'test_fhir'
 
 class private_Form(Form):
+    """
+    WTForms for private profile, which will be init in strcture_json()
+    """
     pass
 
 
-
-
-
 class json_struct:
+
     def __init__(self,key,type,value):
         self.type = type
         self.key = key
         self.value = value
         self.attr = None
+        self.carry_data = False
+        self.data = None
 
     def dump(self,level):
         if self.type == 'value':
@@ -34,8 +37,6 @@ class json_struct:
             print ' '*level+self.key
             if self.value:
                 map(lambda x:x.dump(level+4),self.value)
-
-
 
     def find_by_key(self,key):
         if self.value:
@@ -56,7 +57,6 @@ class json_struct:
         self.value.append(json_struct(key,'None',[]))
         return self.value[-1]
 
-
     def init_type(self,reserved_word):
         if self.key[:len(reserved_word)] == reserved_word:
             self.type = 'temp'
@@ -69,12 +69,63 @@ class json_struct:
             if self.value:
                 map(lambda x:x.init_type(reserved_word),self.value)
 
+    def init_attr(self):
+        if self.value:
+            map(lambda x:x.init_attr(),self.value)
+        if self.type == 'value':
+            self.attr = 'value'
+            self.carry_data = True
+            self.data = self.key
+        elif self.type == 'temp':
+            if self.key_of_value() or len(self.value)==1:
+                self.attr = 'hidden_temp_layer'
+            else:
+                self.attr = 'show_temp_layer'
+
+        elif self.key_of_value():
+            self.attr = 'key_of_value'
+        else:
+            self.attr = 'fold'
+            self.hiden_layer_reduce()
+
+
+    def hiden_layer_reduce(self):
+        if len(self.value)==1 and self.value[0].type=='temp':
+            self.value[0].attr = 'hidden_temp_layer'
+
+
+
+
+
+    def key_of_value(self):
+        if not self.value:
+            return False
+        else:
+            for item in self.value:
+                if not item.carry_data:
+                    print "doesn't carry data"
+                    item.dump(0)
+                    return False
+
+        tmp = []
+        for item in self.value:
+            if len(item.data)==1 and type(item.data)==list:
+                tmp.append(item.data[0])
+            else:
+                tmp.append(item.data)
+
+        if self.type=='temp':
+            self.carry_data = True
+        self.data = tmp
+        return True
+
+
     def set_level(self,level):
 
-        if self.type == 'temp':
+        if self.attr == 'hidden_temp_layer':
             self.level = level
             if self.value:
-                map(lambda x:x.set_level(level+1),self.value)
+                map(lambda x:x.set_level(level),self.value)
         else:
             self.level = level
             if self.value:
@@ -86,7 +137,6 @@ class json_struct:
         if self.value:
             map(lambda x:x.dump_level(),self.value)
 
-
     def dfs(self,num):
         self.seq = num
         num = num+1
@@ -95,12 +145,17 @@ class json_struct:
                 num = item.dfs(num)
         return num
 
-    def append_to_list(self,class_list):
+    def append_to_list(self,class_list,recude=True):
         if self.value:
-            for item in self.value:
-                class_list.append(item)
-                item.append_to_list(class_list)
-
+            if recude==True:
+                for item in self.value:
+                    if not (item.attr=='hidden_temp_layer' or item.type=='value'):
+                        class_list.append(item)
+                    item.append_to_list(class_list)
+            else:
+                for item in self.value:
+                    class_list.append(item)
+                    item.append_to_list(class_list,False)
 
     def set_list(self,templist):
         templist.append(self.key)
@@ -109,6 +164,10 @@ class json_struct:
             for item in self.value:
                 item.set_list(templist)
         templist.pop()
+
+
+    def dump_html(self):
+        pass
 
 
     def get_seq(self):
@@ -151,43 +210,6 @@ class json_struct:
         return self.content
 
 
-def built(target):
-    """
-    transfer dict into json_struct class
-    :param target:Dict file loads from json
-    :return:list of json_struct class
-    """
-    if type(target) == str or type(target) == unicode:
-        return target
-    elif type(target) == dict:
-        li = []
-        for key in target:
-            li.append(json_struct(key,str(type(target[key])).split('\'')[1],build(target[key])))
-        return li
-    elif type(target) == list:
-        li = []
-        for item in target:
-            if type(item) == str or type(item) == unicode:
-                li.append(item)
-            else:
-                li.append(json_struct('None','list',build(item)))
-        return li
-
-
-def level_lift(target):
-    target.level -= 1;
-    if target.value:
-        map(lambda x:level_lift(x),target.value)
-
-def display_reduce(target):
-    if target.type=='temp' and len(target.value)==1:
-        target.set_attr('nondisplay_temp')
-        if target.value:
-            map(lambda x:level_lift(x),target.value)
-
-
-    if target.value:
-        map(lambda x:display_reduce(x),target.value)
 
 
 def get_struct(target,reserved_word):
@@ -204,11 +226,14 @@ def get_struct(target,reserved_word):
 
 
 def build(target,body):
-
+    """
+    set the value in target by its keys into json_struct class
+    :param target: list,[key_0,key_1,...,key_n,value]
+    :param body:json_struct class
+    :return:
+    """
     item = reduce(lambda x,y: x.set_by_key(y),target,body)
     item.value = None
-
-
 
 
 def get_list_and_class(json_file, reserved_word):
@@ -232,12 +257,11 @@ def get_list_and_class(json_file, reserved_word):
     class_list = []
     for item in output.value:
         class_list.append(item)
-        item.append_to_list(class_list)
+        item.append_to_list(class_list,False)
 
 
 
     return li,class_list
-
 
 
 def strcture_json(json_file,reserved_word,fieldname):
@@ -246,16 +270,14 @@ def strcture_json(json_file,reserved_word,fieldname):
 
     if output.value:
         map(lambda x:x.init_type(reserved_word),output.value)
+        map(lambda x:x.init_attr(),output.value)
 
     map(lambda x:x.set_level(0),output.value)
 
-    #map(lambda x:display_reduce(x),output.value)
 
     num = 0
     for item in output.value:
         num = item.dfs(num)
-
-
 
 
 
@@ -284,7 +306,7 @@ def strcture_json(json_file,reserved_word,fieldname):
 
 
     for i in range(len(class_list)):
-        fieldkey=  fieldname+str(i)
+        fieldkey=  fieldname+str(class_list[i].get_seq())
         setattr(private_Form,fieldkey,BooleanField(fieldkey,default=False))
 
 
@@ -310,8 +332,13 @@ def is_prefix(list1,list2):
     return True
 
 
-
 def package(json_file,masked_part):
+    """
+
+    :param json_file: json.loads(raw_json file)
+    :param masked_part: masked part of user profile in the form of python dict obj
+    :return: packaged private profile in the form of json
+    """
 
     masked = json.dumps(masked_part)
     new_dict = {}
@@ -334,8 +361,8 @@ def set_mask(form,json_file,reserved_word,fieldname):
 
     :param form: Contains item which user wanted to hind
     :param json_file: Original json file
-    :param reserved_word:
-    :param fieldname:
+    :param reserved_word: reserved word in json_file mark middle layer
+    :param fieldname: reserved word in form
     :return:
     """
 
@@ -361,15 +388,10 @@ def set_mask(form,json_file,reserved_word,fieldname):
     print masked_part
 
 
-
-
     final_file = package(json_file,masked_part)
 
-
-
-
-
     print json.dumps(masked_part,indent=4)
+
 
 
 reserved_word = 'test'
@@ -404,17 +426,6 @@ if __name__ == '__main__':
 
 
    # di,li,form = strcture_json(e,reserved_word)
-
-
-
-
-
-
-
-
-
-
-
 
 
 
