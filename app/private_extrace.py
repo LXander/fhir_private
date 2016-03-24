@@ -150,9 +150,19 @@ simple_key = ['gender','birthDate']
 choice_key = {'multipleBirth':['multipleBirthBoolean','multipleBirthInteger'],'deceased':['deceasedBoolean','deceasedDateTime']}
 
 def get_option():
+    """
+
+    :return:list of key, item in the list is the field that doctor can choose to see
+    """
     return complex_key+simple_key+choice_key.keys()
 
 def extend_option(form):
+    """
+
+    :param form: form submit from doctor
+    :return: list of key, item in the list is the field that doctor has choose,
+            and selected item in choice_key will be extented to it's value
+    """
     keys = []
     for field in form:
         if field.type =='BooleanField' and field.data == True:
@@ -162,8 +172,6 @@ def extend_option(form):
             elif key in complex_key or key in simple_key:
                 keys.append(key)
     return keys
-
-
 
 class patient_info_domain:
     def __init__(self,file,template,key=None,option='normal',attrs='norm'):
@@ -178,7 +186,7 @@ class patient_info_domain:
         self.is_sub_multi = False
         self.seq = None
         self.attrs = attrs
-
+        self.masked = False
 
         self.comments = None
         self.period = None
@@ -247,12 +255,8 @@ class patient_info_domain:
                 self.is_value = True
                 self.type = type(file[0])
                 print 'wanted '+template+' but get an list :',
-                print file
-                print file[0]
-            elif template=='boolean':
-                self.value = str(file)
-                self.is_value = True
-                self.type = type(file)
+                #print file
+                #print file[0]
             else:
                 self.value = file
                 self.is_value = True
@@ -326,7 +330,7 @@ class patient_info_domain:
     def class2html(self):
         if self.attrs=='simple_domain':
             html_file = '<div class="row simple_domain" id="fhir_value_'+str(self.seq)+'"> <p class="col-sm-4"> '+self.key+'</p>'
-            html_file = html_file + '<div class="col-sm-5"">'+'<p>'+self.value+'</p></div>'
+            html_file = html_file + '<div class="col-sm-5"">'+'<p>'+str(self.value)+'</p></div>'
             html_file = html_file + '<div class="col-sm-3">'+self.buttom()+'</div></div>'
 
 
@@ -337,10 +341,10 @@ class patient_info_domain:
                 html_file = '<div class="row"> <p  class="col-sm-3"  >'+self.key+'</p>'
                 html_file = html_file + '<div class="col-sm-9">'
                 for v in self.value:
-                    html_file  = html_file+'<p>'+v+'</p>'
+                    html_file  = html_file+'<p>'+str(v)+'</p>'
                 html_file = html_file + '</div></div>'
             else:
-                html_file = '<div class="row"><p  class="col-sm-3"  >'+self.key+'</p>'+'<div class="col-sm-9">'+'<p>'+self.value+'</p>'+'</div></div>'
+                html_file = '<div class="row"><p  class="col-sm-3"  >'+self.key+'</p>'+'<div class="col-sm-9">'+'<p>'+str(self.value)+'</p>'+'</div></div>'
         elif self.multi:
             html_file = '' #'<h3>'+self.key+'</h3>'
             for domain in self.sub_domain:
@@ -429,7 +433,7 @@ class patient_info_domain:
                     json_file = json_file + '"' + v + '"'
                 json_file = json_file +']'
             else:
-                json_file = '"'+self.key+'":"' + self.value +'"'
+                json_file = '"'+self.key+'":"' + str(self.value) +'"'
         elif self.multi:
             flag = True
             json_file = '"'+ self.key+'":['
@@ -443,7 +447,53 @@ class patient_info_domain:
 
         return json_file
 
+    def retrive_json(self,profile=None):
+        if profile:
+            json_file = ''
+            flag = True
+            json_file = '"' + self.key +'":['
+            for domain in self.sub_domain:
+                if not domain.key in profile:
+                    if flag:
+                        flag = False
+                    else:
+                        json_file = json_file +','
+                    json_file = json_file + domain.retrive_json()
+            json_file = json_file + ']'
+        else:
+            json_file = self.class2json()
 
+        return json_file
+
+
+
+    def mask_by_seq(self,seq):
+        if self.seq == seq:
+            print self.key
+            print self.seq
+            self.masked = True
+        elif self.sub_domain:
+            for domain in self.sub_domain:
+                domain.mask_by_seq(seq)
+
+    def get_masked_sub_domain(self):
+        if self.attrs == 'complex_domain':
+            mask_domain = []
+            all_masked = True
+            for domain in self.sub_domain:
+                if domain.masked:
+                    mask_domain.append(domain.key)
+                else:
+                    all_masked = False
+            if all_masked:
+                return self.key,'fhir_mask'
+            else:
+                return self.key,mask_domain
+        else:
+            if self.masked:
+                return self.key,'fhir_mask'
+            else:
+                return self.key,None
 
 class patient_info:
 
@@ -492,9 +542,91 @@ class patient_info:
         json_file = json_file + '}'
         return json_file
 
+    def retrive_json(self,profile,selected_keys):
+        flag = True
+        json_file = '{'
+        for domain in self.sub_domains:
+            key = domain.key
+            if key in selected_keys:
+                if flag:
+                    flag = False
+                else:
+                    json_file = json_file + ','
 
-def get_patient_info_key():
-    return complex_key+simple_key
+                if key in profile.keys():
+                    if profile[key] == 'fhir_mask':
+                        json_file = json_file + '"'+domain.key+'":"mask"'
+                    else:
+                        json_file = json_file + domain.retrive_json(profile[key])
+                else:
+                    json_file = json_file + domain.retrive_json()
+        json_file = json_file + '}'
+
+        return json_file
+
+    def mask_by_seq(self,seq):
+        for domain in self.sub_domains:
+            domain.mask_by_seq(seq)
+
+    def get_masked(self):
+        maksed = map(lambda domain:domain.get_masked_sub_domain(),self.sub_domains)
+        masked = dict((key,value) for key,value in maksed if value)
+
+
+        return masked
+
+def get_private_profile(patient_form,patient_class,patient_json):
+    """
+    based on the patient's info and patient's private setting get the private profile
+
+    :param patient_form: Form submit from the private setting page
+    :param patient_class: Patient_info class
+    :param patient_json: str type json file get from server
+    :return: str type json file to be seved in our private server
+    """
+
+    for field in patient_form:
+        if field.type == 'BooleanField' and field.data == True:
+            seq =  int(field.name[14:])
+            patient_class.mask_by_seq(seq)
+
+    masked_part = patient_class.get_masked()
+
+    new_dict = {}
+    if 'id' in patient_json :
+        new_dict['id'] = patient_json['id']
+
+    if 'resourceType' in patient_json:
+        new_dict['resourceType'] = patient_json['resourceType']
+
+    if 'resourceID' in patient_json:
+        new_dict['resourceID'] = patient_json['resourceID']
+
+    new_dict['Policy'] = masked_part
+
+    #print json.dumps(new_dict,indent=4)
+
+    #retrive_patient_info(simple_key+complex_key,json.dumps(new_dict),json.dumps(jp.w))
+
+    return json.dumps(new_dict)
+
+
+def retrive_patient_info(selected_keys,private_profile,raw_json):
+    """
+
+    :param selected_keys: the item of patient's profile that the doctor want to knew about
+    :param private_profile: private profile in our private server
+    :param raw_json: str type json file about patient's info we get from the server
+    :return: str type json file of patient info that the doctor can see, if some filed has been hidden,
+                the value of it will be 'mask'
+    """
+    patient = patient_info(json.loads(raw_json))
+    profile = json.loads(private_profile)['Policy']
+    print 'profile'
+    print profile
+    json_file = patient.retrive_json(profile,selected_keys)
+    print json_file
+    print json.dumps(json.loads(json_file),indent=4)
 
 
 if __name__ =='__main__':
@@ -503,8 +635,8 @@ if __name__ =='__main__':
 
     patient = patient_info(e)
     #patient.dump()
-    json_file =  patient.class2json()
-    obj = json.loads(json_file)
+    patient_json =  patient.class2json()
+    obj = json.loads(patient_json)
     patient.dump()
     #print json.dumps(obj,indent=4)
     #print type(patient.sub_domains[0].key)
