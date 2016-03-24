@@ -5,6 +5,7 @@ import copy
 import json
 
 
+
 template =json.loads( '''
 {
     "name":[
@@ -29,6 +30,10 @@ template =json.loads( '''
     ],
     "gender":"code",
     "birthDate":"code",
+    "multipleBirthBoolean":"boolean",
+    "multipleBirthInteger":"integer",
+    "deceasedDateTime":"dataTime",
+    "deceasedBoolean":"boolean",
     "address":[
         {
             "use":"code",
@@ -98,6 +103,39 @@ template =json.loads( '''
             "gender":"code",
             "period":"period"
         }
+    ],
+    "communication":[
+        {
+            "language":[
+                {
+                    "coding":[
+                        {
+                            "system":"uri",
+                            "version":"string",
+                            "code":"code",
+                            "display":"string",
+                            "userSelected":"boolean"
+                        }
+                    ],
+                    "text":"string"
+                }
+            ],
+            "preferred":"boolean"
+        }
+    ],
+    "maritalStatus":[
+        {
+            "coding":[
+                {
+                    "system":"uri",
+                    "version":"string",
+                    "code":"code",
+                    "display":"string",
+                    "userSelected":"boolean"
+                }
+            ],
+            "text":"string"
+        }
     ]
 
 
@@ -107,6 +145,23 @@ template =json.loads( '''
 '''
                       )
 
+complex_key = ['name','telecom','contact','address','animal','communication','maritalStatus']
+simple_key = ['gender','birthDate']
+choice_key = {'multipleBirth':['multipleBirthBoolean','multipleBirthInteger'],'deceased':['deceasedBoolean','deceasedDateTime']}
+
+def get_option():
+    return complex_key+simple_key+choice_key.keys()
+
+def extend_option(form):
+    keys = []
+    for field in form:
+        if field.type =='BooleanField' and field.data == True:
+            key = field.name
+            if key in choice_key.keys():
+                keys = keys + choice_key[key]
+            elif key in complex_key or key in simple_key:
+                keys.append(key)
+    return keys
 
 
 
@@ -174,11 +229,14 @@ class patient_info_domain:
 
         elif type(template) == dict:
             print template
+            self.type=dict
             tmp = file.keys()
             tmp = self.set_period(file,tmp)
             tmp = self.set_comments(file, tmp)
             for key in tmp:
+                print key
                 if key in template.keys():
+                    print key
                     new_domain = patient_info_domain(file[key],template[key],key)
                     self.sub_domain.append(new_domain)
 
@@ -191,10 +249,15 @@ class patient_info_domain:
                 print 'wanted '+template+' but get an list :',
                 print file
                 print file[0]
+            elif template=='boolean':
+                self.value = str(file)
+                self.is_value = True
+                self.type = type(file)
             else:
                 self.value = file
                 self.is_value = True
                 self.type = type(file)
+
 
     def set_period(self,file,key_list):
         if 'period' in key_list:
@@ -260,16 +323,16 @@ class patient_info_domain:
             for domain in self.sub_domain:
                 domain.dump(level+1)
 
-
     def class2html(self):
         if self.attrs=='simple_domain':
-            html_file = '<div class="row simple_domain" id="fhir_value_'+str(self.seq)+'"> <p class="col-sm-3"> '+self.key+'</p>'
-            html_file = html_file + '<div class="col-sm-6"">'+'<p>'+self.value+'</p></div>'
+            html_file = '<div class="row simple_domain" id="fhir_value_'+str(self.seq)+'"> <p class="col-sm-4"> '+self.key+'</p>'
+            html_file = html_file + '<div class="col-sm-5"">'+'<p>'+self.value+'</p></div>'
             html_file = html_file + '<div class="col-sm-3">'+self.buttom()+'</div></div>'
 
 
 
         elif self.is_value:
+
             if self.type==list:
                 html_file = '<div class="row"> <p  class="col-sm-3"  >'+self.key+'</p>'
                 html_file = html_file + '<div class="col-sm-9">'
@@ -300,6 +363,7 @@ class patient_info_domain:
                 html_file = html_file+'<p>' + domain.class2html()+'</p>'
 
             html_file = html_file + '</div>'
+
         else:
             html_file = ''
             print 'unexcepted condition'
@@ -381,134 +445,16 @@ class patient_info_domain:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 class patient_info:
-
-    patient_info_key = ['name','telecom','gender','birthDate','deceased','contact','address','maritalStatus','multipleBirth','animal','communication']
-    complex_key = ['name','telecom','contact','address','animal','communication']
-    simple_key = ['gender','birthDate','deceased','maritalStatus','multipleBirth']
-
-    template =json.loads( '''
-{
-    "name":[
-        {
-            "use":"code",
-            "text":"string",
-            "family":"list",
-            "given":"list",
-            "prefix":"list",
-            "period":"period"
-
-        }
-    ],
-    "telecom":[
-        {
-            "system":"code",
-            "value":"string",
-            "use":"code",
-            "rank":"int",
-            "period":"period"
-        }
-    ],
-    "gender":"code",
-    "birthDate":"code",
-    "address":[
-        {
-            "use":"code",
-            "type":"code",
-            "text":"string",
-            "line":"string",
-            "city":"string",
-            "district":"string",
-            "state":"string",
-            "state":"string",
-            "postalCode":"string",
-            "country":"string",
-            "period":"period"
-        }
-    ],
-    "contact":[
-        {
-            "relationship":[
-                {
-                    "coding":[
-                        {
-                            "system":"uri",
-                            "version":"string",
-                            "code":"code",
-                            "display":"string",
-                            "userSelected":"boolean"
-                        }
-                    ],
-                    "text":"string"
-                }
-            ],
-            "name":[
-                {
-                    "use":"code",
-                    "text":"string",
-                    "family":"list",
-                    "given":"list",
-                    "prefix":"list",
-                    "period":"period"
-
-                }
-            ],
-            "telecom":[
-                {
-                    "system":"code",
-                    "value":"string",
-                    "use":"code",
-                    "rank":"int",
-                    "period":"period"
-                }
-            ],
-            "address":[
-                {
-                    "use":"code",
-                    "type":"code",
-                    "text":"string",
-                    "line":"string",
-                    "city":"string",
-                    "district":"string",
-                    "state":"string",
-                    "state":"string",
-                    "postalCode":"string",
-                    "country":"string",
-                    "period":"period"
-                }
-            ],
-            "gender":"code",
-            "period":"period"
-        }
-    ]
-
-
-
-}
-
-'''
-                      )
 
     def __init__(self,file):
         self.sub_domains = []
-        for key in self.complex_key:
+        for key in complex_key:
             if key in file.keys():
                 new_domain = patient_info_domain(
                     file=file[key],template=template[key],key=key,attrs='complex_domain')
                 self.sub_domains.append(new_domain)
-        for key in self.simple_key:
+        for key in simple_key:
             if key in file.keys():
                 new_domain = patient_info_domain(
                     file=file[key],template=template[key],key=key,attrs='simple_domain')
@@ -547,12 +493,14 @@ class patient_info:
         return json_file
 
 
-
+def get_patient_info_key():
+    return complex_key+simple_key
 
 
 if __name__ =='__main__':
     temp = template
     e = jp.s
+
     patient = patient_info(e)
     #patient.dump()
     json_file =  patient.class2json()

@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect
 from app import app
-from .forms import LoginForm
+from forms import set_query_form
 from forms import set_patient_from_and_class
 import jsonexample as jp
 import set_private as sp
@@ -28,14 +28,14 @@ def index():
 @app.route('/')
 @app.route('/submit', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
+    form = set_query_form()
     if form.validate_on_submit():
         #flash('Login requested for OpenID="%s", remember_me=%s' %
         #     (form.openid.data, str(form.remember_me.data)))
-
+        keys = pe.extend_option(form)
         return render_template('index.html',
                           title="Result",
-                          form = form)
+                          form = form,keys = keys)
         #return redirect('/index')
     return render_template('submit.html', 
                            title='Submit',
@@ -47,7 +47,7 @@ def login():
 
 @app.route('/patient',methods=['GET','POST'])
 def set():
-    e = jp.s
+    e = jp.w
     reserved_word = 'test'
     fieldname = 'fieldname'
     class_list,class_dict,form = sp.strcture_json(e,reserved_word,fieldname)
@@ -61,7 +61,7 @@ def set():
 
 @app.route('/patient_test',methods=['GET','POST'])
 def set_form():
-    e = jp.s
+    e = jp.w
     patient_info_form,patient_info_class = set_patient_from_and_class(e)
     if patient_info_form.validate_on_submit():
         return render_template('temp.html',form= patient_info_form)

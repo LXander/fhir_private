@@ -4,20 +4,11 @@ from wtforms.validators import DataRequired
 import private_extrace as pe
 
 
-
+#patient_info_key = ['name','telecom','gender','birthDate','deceased','contact','address','maritalStatus','multipleBirth','animal','communication']
 
 class LoginForm(Form):
     identifier= StringField('identifier', validators=[DataRequired(message=u'You must input patient\'s ID')])
-    active = BooleanField('active',default=False)
-    name = BooleanField('name',default=False)
-    telecom = BooleanField('telecom',default=False)
-    gender = BooleanField('gender',default=False)
-    birthDate = BooleanField('birthDate',default=False)
-    address = BooleanField('address',default=False)
-    maritalStatus = BooleanField('maritalStatus',default=False)
 
-    contact_relationship = BooleanField('contact_relationship',default=False)
-    contact_name = BooleanField('contact_name',default=False)
     #remember_me = BooleanField('address', default=False)
 
 
@@ -36,5 +27,12 @@ def set_patient_from_and_class(json_file):
     form = Patient_from()
     return form,patient_info_class
 
+def set_query_form():
+    patient_info_key = pe.get_option()
+    for i in range(len(patient_info_key)):
+        setattr(LoginForm,patient_info_key[i],BooleanField(patient_info_key[i],default=False))
+
+    form = LoginForm()
+    return form
 
 
