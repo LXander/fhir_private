@@ -451,4 +451,153 @@ simple = json.loads('''
 '''
 )
 
+
+ob_ep = json.loads(
+    '''
+    {
+    "status": "final",
+    "valueCodeableConcept": {
+        "coding": [
+            {
+                "code": "10828004",
+                "system": "http://snomed.info/sct",
+                "display": "Positive"
+            }
+        ]
+    },
+    "code": {
+        "coding": [
+            {
+                "code": "55233-1",
+                "system": "http://loinc.org",
+                "display": "Genetic analysis master panel"
+            }
+        ]
+    },
+    "extension": [
+        {
+            "url": "http://hl7.org/fhir/StructureDefinition/observation-geneticsSequence",
+            "valueReference": {
+                "reference": "Sequence/example"
+            }
+        },
+        {
+            "url": "http://hl7.org/fhir/StructureDefinition/observation-geneticsSource",
+            "valueCodeableConcept": {
+                "coding": [
+                    {
+                        "code": "LA6684-0",
+                        "system": "http://hl7.org/fhir/LOINC",
+                        "display": "somatic"
+                    }
+                ]
+            }
+        },
+        {
+            "url": "http://hl7.org/fhir/StructureDefinition/observation-geneticsVariationHGVS",
+            "extension": [
+                {
+                    "url": "genomeBuild",
+                    "valueCodeableConcept": {
+                        "text": "GRCh 38"
+                    }
+                },
+                {
+                    "url": "name",
+                    "valueCodeableConcept": {
+                        "text": "NG_007726.3:g.146252T>G"
+                    }
+                }
+            ]
+        },
+        {
+            "url": "http://hl7.org/fhir/StructureDefinition/observation-geneticsGene",
+            "valueCodeableConcept": {
+                "coding": [
+                    {
+                        "code": "3236",
+                        "system": "http://www.genenames.org",
+                        "display": "EGFR"
+                    }
+                ]
+            }
+        },
+        {
+            "url": "http://hl7.org/fhir/StructureDefinition/observation-geneticsRegion",
+            "valueCodeableConcept": {
+                "text": "Exon 21"
+            }
+        }
+    ],
+    "resourceType": "Observation",
+    "text": {
+        "status": "generated",
+        "div": "<div><p><b>Generated Narrative with Details</b></p></div>"
+    },
+    "specimen": {
+        "display": "Molecular Specimen ID: MLD45-Z4-1234",
+        "reference": "Specimen/genetics-example1-somatic"
+    },
+    "component": [
+        {
+            "valueCodeableConcept": {
+                "text": "Lung cancer",
+                "coding": [
+                    {
+                        "code": "363358000",
+                        "system": "http://snomed.info/sct",
+                        "display": "Malignant tumor of lung (disorder)"
+                    }
+                ]
+            },
+            "code": {
+                "coding": [
+                    {
+                        "code": "51967-8",
+                        "system": "http://loinc.org",
+                        "display": "Genetic disease assessed"
+                    }
+                ]
+            }
+        },
+        {
+            "valueCodeableConcept": {
+                "coding": [
+                    {
+                        "code": "LA6669-1",
+                        "display": "Pathogenic"
+                    }
+                ]
+            },
+            "code": {
+                "coding": [
+                    {
+                        "code": "53037-8",
+                        "system": "http://loinc.org",
+                        "display": "Genetic disease sequence variation interpretation"
+                    }
+                ]
+            }
+        }
+    ],
+    "performer": [
+        {
+            "display": "Molecular Diagnostic Laboratory",
+            "reference": "Practitioner/genetics-example1-somatic"
+        }
+    ],
+    "meta": {
+        "versionId": 1,
+        "lastUpdated": "2016-03-22T14:11:12.235286"
+    },
+    "issued": "2013-03-11T10:28:00+01:00",
+    "id": "ob-genetics-1",
+    "subject": {
+        "display": "Molecular Lab Patient ID: HOSP-23456",
+        "reference": "Patient/genetics-example1-somatic"
+    }
+}
+    '''
+)
+
 example = simple

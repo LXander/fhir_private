@@ -62,13 +62,15 @@ def set():
 @app.route('/patient_test',methods=['GET','POST'])
 def set_form():
     e = jp.w
+    o = jp.ob_ep
+    observation = pe.ob_info(o)
     patient_info_form,patient_info_class = set_patient_from_and_class(e)
     if patient_info_form.validate_on_submit():
 
         pe.get_private_profile(patient_info_form,patient_info_class,e)
 
         return render_template('temp.html',form= patient_info_form)
-    return render_template('private_set.html',form = patient_info_form,patient_info = patient_info_class)
+    return render_template('private_set.html',form = patient_info_form,patient_info = patient_info_class,observation = observation)
 
 
 
