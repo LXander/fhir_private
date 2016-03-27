@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect
 from app import app
 from forms import set_query_form
-from forms import set_patient_from_and_class
+from forms import set_relative_info
 import jsonexample as jp
 import set_private as sp
 import private_extrace as pe
@@ -63,11 +63,11 @@ def set():
 def set_form():
     e = jp.w
     o = jp.ob_ep
-    observation = pe.ob_info(o)
-    patient_info_form,patient_info_class = set_patient_from_and_class(e)
+    s = jp.seq_ep
+    patient_info_form,patient_info_class,observation = set_relative_info(e,o,[s])
     if patient_info_form.validate_on_submit():
 
-        pe.get_private_profile(patient_info_form,patient_info_class,e)
+        pe.get_private_profile(patient_info_form,patient_info_class,observation,e)
 
         return render_template('temp.html',form= patient_info_form)
     return render_template('private_set.html',form = patient_info_form,patient_info = patient_info_class,observation = observation)

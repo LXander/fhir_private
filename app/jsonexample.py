@@ -451,6 +451,79 @@ simple = json.loads('''
 '''
 )
 
+seq_ep = json.loads(
+    '''
+    {
+    "referenceSeq": {
+        "text": "ENSESTT00000085772.1",
+        "coding": [
+            {
+                "code": "ENSESTT00000085772.1",
+                "system": "http://www.ensembl.org"
+            }
+        ]
+    },
+    "repository": [
+        {
+            "url": "https://www.googleapis.com/genomics/v1beta2",
+            "name": "ga4gh",
+            "readGroupSetId": "B1B2",
+            "variantId": "A1A2"
+        }
+    ],
+    "resourceType": "Sequence",
+    "observedAllele": "T",
+    "species": {
+        "text": "Homo sapiens",
+        "coding": [
+            {
+                "code": "337915000",
+                "system": "http://snomed.info/sct"
+            }
+        ]
+    },
+    "meta": {
+        "versionId": 1,
+        "lastUpdated": "2016-03-23T13:48:34.689681"
+    },
+    "text": {
+        "status": "generated",
+        "div": "<div><p><b>Generated Narrative with Details</b></p></div>"
+    },
+    "coordinate": [
+        {
+            "start": 55227976,
+            "end": 55227977,
+            "chromosome": {
+                "coding": [
+                    {
+                        "code": "7"
+                    }
+                ]
+            },
+            "genomeBuild": "GRCh37"
+        }
+    ],
+    "variationID": [
+        {
+            "text": "rs363358000",
+            "coding": [
+                {
+                    "code": "363358000",
+                    "system": "http://snomed.info/sct"
+                }
+            ]
+        }
+    ],
+    "type": "DNA",
+    "id": "example",
+    "referenceAllele": "A"
+}
+
+
+    '''
+)
+
 
 ob_ep = json.loads(
     '''
