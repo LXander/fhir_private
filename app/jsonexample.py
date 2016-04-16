@@ -673,4 +673,10 @@ ob_ep = json.loads(
     '''
 )
 
+private_policy = json.loads(
+'''
+    {"resourceType": "Patient", "Policy": {"Patient": {"telecom": ["mobile"], "birthDate": "fhir_mask"}, "Observation": {}, "Sequence": {}}, "id": "f001"}
+'''
+)
+
 example = simple

@@ -4,7 +4,7 @@ import jsondump as jd
 import copy
 import json
 
-
+masked_info = 'Content can not display'
 
 patient_template =json.loads('''
 {
@@ -332,6 +332,7 @@ class observation_domain:
         self.seq = None
         self.attrs = attrs
         self.masked = False
+        self.display_mask = False
 
         self.comments = None
         self.period = None
@@ -532,6 +533,79 @@ class observation_domain:
 
         if self.types == 'basic_layer':
             html_file = '<div class="title_row"><h3>'+self.key+self.buttom()+'</h3></div>'
+            html_file = html_file +'<div class = "basic_layer" id = "basic_layer_'+str(self.seq)+'">'
+
+        else:
+            html_file = ''
+
+        if self.multi:
+            html_file = html_file + '<div class="complex_layer">'
+            for domain in self.sub_domain:
+                html_file = html_file+domain.class2html()
+            html_file = html_file + '</div>'
+        elif self.is_sub_multi:
+            if self.multi_key():
+                html_key =''
+            else:
+                html_key = self.key
+            html_file = html_file + '<div class="sub_title_row"><h4>'+html_key+'</h4></div>'
+            html_file = html_file + '<div class="sub_layer">'
+            for domain in self.sub_domain:
+                html_file = html_file+'<p>'+ domain.class2html()+'</p>'
+            html_file = html_file + '</div>'
+        elif self.is_value:
+
+            if self.types==list:
+                html_file = '<div class="row"> <p  class="col-sm-3"  >'+self.key+'</p>'
+                html_file = html_file + '<div class="col-sm-9">'
+                for v in self.value:
+                    html_file  = html_file+'<p>'+str(v)+'</p>'
+                html_file = html_file + '</div></div>'
+            else:
+                html_file = '<div class="row"><p  class="col-sm-3"  >'+self.key+'</p>'+'<div class="col-sm-9">'+'<p>'+str(self.value)+'</p>'+'</div></div>'
+
+        elif self.attrs == "CodeableConcept" or self.attrs == 'Reference':
+
+            for domain in self.sub_domain:
+                html_file = html_file+ domain.class2html()
+
+        else:
+            print self.attrs
+            html_file = ''
+            print 'unexcepted condition'
+
+        if self.types == 'basic_layer':
+            html_file = html_file + '</div>'
+        return html_file
+
+    def display_class2html(self):
+
+        if self.attrs == 'sequence':
+            if self.display_mask:
+                html_file = '<div class="title_row"><h3>'+self.key+'</h3></div>'
+                html_file = html_file + '<div class = "basic_layer" id = "basic_layer_'+str(self.seq)+'">'
+                html_file = html_file + '<p class="fhir_masked">'+masked_info+'</p>'
+                html_file = html_file + '</div>'
+            else:
+                html_file = '<div class="title_row"><h3>'+self.key+'</h3></div>'
+                html_file = html_file + '<div class = "basic_layer" id = "basic_layer_'+str(self.seq)+'">'
+
+                for domain in self.sub_domain:
+                    html_file = html_file + '<p>' + domain.display_class2html() + '</p>'
+
+                html_file = html_file + '</div>'
+            return html_file
+
+        if self.display_mask:
+            html_file = '<div class="title_row"><h3>'+self.key+'</h3></div>'
+            html_file = html_file +'<div class = "basic_layer" id = "basic_layer_'+str(self.seq)+'">'
+            html_file = html_file + '<p class="fhir_masked">'+masked_info+'</p>'
+            html_file = html_file + '</div>'
+            return html_file
+
+
+        if self.types == 'basic_layer':
+            html_file = '<div class="title_row"><h3>'+self.key+'</h3></div>'
             html_file = html_file +'<div class = "basic_layer" id = "basic_layer_'+str(self.seq)+'">'
 
         else:
@@ -818,8 +892,6 @@ class sequence_domain:
             html_file = html_file + '</div>'
         return html_file
 
-
-
 class patient_info_domain:
     def __init__(self,file,template,key=None,option='normal',attrs='norm'):
         self.has_period = False
@@ -834,6 +906,7 @@ class patient_info_domain:
         self.seq = None
         self.attrs = attrs
         self.masked = False
+        self.display_mask = False
 
         self.comments = None
         self.period = None
@@ -976,8 +1049,8 @@ class patient_info_domain:
 
     def class2html(self):
         if self.attrs=='simple_domain':
-            html_file = '<div class="row simple_domain" id="fhir_value_'+str(self.seq)+'"> <p class="col-sm-4"> '+self.key+'</p>'
-            html_file = html_file + '<div class="col-sm-5"">'+'<p>'+str(self.value)+'</p></div>'
+            html_file = '<div class="row simple_domain" id="fhir_value_'+str(self.seq)+'"> <p class="col-sm-3"> '+self.key+'</p>'
+            html_file = html_file + '<div class="col-sm-6"">'+'<p>'+str(self.value)+'</p></div>'
             html_file = html_file + '<div class="col-sm-3">'+self.buttom()+'</div></div>'
 
 
@@ -1012,6 +1085,67 @@ class patient_info_domain:
 
             for domain in self.sub_domain:
                 html_file = html_file+'<p>' + domain.class2html()+'</p>'
+
+            html_file = html_file + '</div>'
+
+        else:
+            html_file = ''
+            print 'unexcepted condition'
+
+        return html_file
+
+    def display_class2html(self):
+        if self.attrs=='simple_domain':
+            if self.display_mask:
+                html_file = '<div class="row simple_domain" id="fhir_value_'+str(self.seq)+'"> <p class="col-sm-3"> '+self.key+'</p>'
+                html_file = html_file + '<div class="col-sm-9"">'+'<p class="fhir_masked">'+masked_info+'</p></div></div>'
+            else:
+                html_file = '<div class="row simple_domain" id="fhir_value_'+str(self.seq)+'"> <p class="col-sm-3"> '+self.key+'</p>'
+                html_file = html_file + '<div class="col-sm-9"">'+'<p>'+str(self.value)+'</p></div></div>'
+                #html_file = html_file + '<div class="col-sm-3">'+self.buttom()+'</div></div>'
+
+
+
+        elif self.is_value:
+            if self.display_mask:
+                html_file = '<div class="row"><p  class="col-sm-3"  >'+self.key+'</p>'+'<div class="col-sm-9">'+'<p class="fhir_masked">'+masked_info+'</p>'+'</div></div>'
+
+            elif self.type==list:
+                html_file = '<div class="row"> <p  class="col-sm-3"  >'+self.key+'</p>'
+                html_file = html_file + '<div class="col-sm-9">'
+                for v in self.value:
+                    html_file  = html_file+'<p>'+str(v)+'</p>'
+                html_file = html_file + '</div></div>'
+            else:
+                html_file = '<div class="row"><p  class="col-sm-3"  >'+self.key+'</p>'+'<div class="col-sm-9">'+'<p>'+str(self.value)+'</p>'+'</div></div>'
+        elif self.multi:
+            html_file = '' #'<h3>'+self.key+'</h3>'
+            for domain in self.sub_domain:
+                html_file = html_file+domain.display_class2html()
+        elif self.is_sub_multi:
+            html_file =''
+            if self.attrs=='basic_layer':
+                if self.inner_key():
+                    html_key = self.key
+                else:
+                    html_key = ''
+
+                if self.display_mask:
+                    html_file = '<div class="title_row"><h3>'+html_key+'</h3></div>'
+                else:
+                    html_file = '<div class="title_row"><h3>'+html_key+self.period2html()+'</h3></div>'
+
+
+            html_file = html_file + '<div class = "basic_layer" id = "basic_layer_'+ str(self.seq)+'">'
+
+            if self.display_mask:
+                html_file = html_file + '<p class="fhir_masked">'+masked_info+'</p>'
+
+            else:
+                html_file = html_file + self.comments2html()
+
+                for domain in self.sub_domain:
+                    html_file = html_file+'<p>' + domain.display_class2html()+'</p>'
 
             html_file = html_file + '</div>'
 
@@ -1112,8 +1246,6 @@ class patient_info_domain:
 
         return json_file
 
-
-
     def mask_by_seq(self,seq):
         if self.seq == seq:
             print self.key
@@ -1142,24 +1274,42 @@ class patient_info_domain:
             else:
                 return self.key,None
 
+    def mask_broadcast(self,mask):
+        if type(mask) == dict:
+            for domain in self.sub_domain:
+                if mask.has_key(domain.key):
+                    domain.mask_braodcast(mask[domain.key])
+        elif mask == 'fhir_mask':
+            if self.is_value:
+                self.display_mask = True
+            else:
+                for domain in self.sub_domain:
+                    domain.display_mask = True
+        else:
+            for domain in self.sub_domain:
+                if domain.key in mask:
+                    domain.display_mask = True
 
 class ob_info:
 
     def __init__(self,file):
-        if file.has_key('id'):
-            self.id = file['id']
+        if file:
+            if file.has_key('id'):
+                self.id = file['id']
+            else:
+                print 'has no id'
+            self.sub_domains = []
+            self.sequences = []
+            for key in observation_template.keys():
+                if key in file.keys():
+                    new_domain = observation_domain(file = file[key],template= observation_template[key],key=key,types='basic_layer')
+                    self.sub_domains.append(new_domain)
+            #self.init_seq()
         else:
-            print 'has no id'
-        self.sub_domains = []
-        self.sequences = []
-        for key in observation_template.keys():
-            if key in file.keys():
-                new_domain = observation_domain(file = file[key],template= observation_template[key],key=key,types='basic_layer')
-                self.sub_domains.append(new_domain)
-        #self.init_seq()
+            self.sub_domains = []
+            self.sequences = []
 
     def add_sequence(self,file):
-
         seq_seq = len(self.sequences)
         new_domain = observation_domain(file=file, template = sequence_template,key = 'sequence_'+str(seq_seq),attrs = 'sequence')
         if file.has_key('id'):
@@ -1174,12 +1324,13 @@ class ob_info:
         for s in self.sequences:
             s.mask_by_seq(seq)
 
-
     def init_seq(self,num):
-        for domain in self.sub_domains:
-            num = domain.dfs(num)
-        for domain in self.sequences:
-            num = domain.set_seq(num)
+        if self.sub_domains:
+            for domain in self.sub_domains:
+                num = domain.dfs(num)
+        if self.sequences:
+            for domain in self.sequences:
+                num = domain.set_seq(num)
         self.field_num = num
 
     def dump(self):
@@ -1214,6 +1365,17 @@ class ob_info:
 
         return ob_masked,se_masked
 
+    def mask_broadcast_ob(self,mask):
+        for domain in self.sub_domains:
+            print domain.key
+            print mask
+            if domain.key in mask:
+                domain.display_mask = True
+
+    def mask_broadcast_seq(self,mask):
+        for seq in self.sequences:
+            if mask.has_key(seq.key):
+                seq.diaplsy_mask = True
 
 class seq_info:
 
@@ -1255,12 +1417,10 @@ class seq_info:
     def class2html(self):
         pass
 
-
-
-
 class patient_info:
 
     def __init__(self,file):
+        self.select_keys = []
         self.sub_domains = []
         for key in complex_key:
             if key in file.keys():
@@ -1277,6 +1437,12 @@ class patient_info:
     def has_simple_domain(self):
         for domain in self.sub_domains:
             if domain.attrs=='simple_domain':
+                return True
+        return False
+
+    def display_has_simple_domain(self):
+        for domain in self.sub_domains:
+            if domain.attrs=='simple_domain' and domain.key in self.select_keys:
                 return True
         return False
 
@@ -1338,6 +1504,14 @@ class patient_info:
 
         return masked
 
+    def mask_broadcast(self,mask):
+        for domain in self.sub_domains:
+            if mask.has_key(domain.key):
+                domain.mask_broadcast(mask[domain.key])
+
+    def set_select_keys(self,select_keys):
+        self.select_keys = select_keys
+
 def get_private_profile(patient_form,patient_class,observation,patient_json):
     """
     based on the patient's info and patient's private setting get the private profile
@@ -1391,7 +1565,33 @@ def get_private_profile(patient_form,patient_class,observation,patient_json):
 
     #retrive_patient_info(simple_key+complex_key,json.dumps(new_dict),json.dumps(jp.w))
 
+    print json.dumps(new_dict)
+
     return json.dumps(new_dict)
+
+def display(selected_keys,private_profile,raw_json_patient,raw_ob,raw_seq):
+    patient = patient_info(json.loads(raw_json_patient))
+    profile = json.loads(private_profile)['Policy']
+    patient.set_select_keys(selected_keys)
+    patient.mask_broadcast(profile['Patient'])
+
+
+    ob = json.loads(raw_ob)
+    observation = ob_info(ob)
+    ob_profile = profile['Observation']
+    if ob_profile.has_key(ob['id']):
+        observation.mask_broadcast_ob(ob_profile[ob['id']])
+
+    seq_profile = profile['Sequence']
+    for s in raw_seq:
+        observation.add_sequence(json.loads(s))
+
+    observation.mask_broadcast_seq(seq_profile)
+
+    return patient,observation
+
+
+
 
 
 
@@ -1413,13 +1613,17 @@ def retrive_patient_info(selected_keys, private_profile, raw_json_patient,raw_ob
     print json.dumps(json.loads(patient_json_file),indent=4)
 
     ob = json.loads(raw_ob)
-    ob_profile = json.loads(profile['Observation'])
+    print 'OBSERVATION'
+    print ob
+    print profile
+    print profile['Observation']
+    ob_profile = profile['Observation']
     if ob_profile.has_key(ob['id']):
         keys = ob_profile[ob['id']]
         for key in ob.keys():
             if key in keys:
                 del ob[key]
-    observation = json.dups(ob)
+    observation = json.dumps(ob)
 
     print json.dumps(json.loads(ob),indent=4)
 
@@ -1436,22 +1640,30 @@ def retrive_patient_info(selected_keys, private_profile, raw_json_patient,raw_ob
 
     return patient_json_file,ob,sequences
 
-
-
 def ob_test():
     e = jp.seq_ep
     o = jp.ob_ep
     print e
-    ob = ob_info(o)
+    ob = ob_info([])
     ob.add_sequence(e)
-    print ob.id
     for domain in ob.sequences:
         print domain.id
         print domain.class2html()
 
 
+def retrive_test():
+    private_profile = json.dumps(jp.private_policy)
+    seq = json.dumps(jp.seq_ep)
+    raw_ob = json.dumps(jp.ob_ep)
+    raw_json_patient = json.dumps(jp.w)
+    raw_seq = [seq]
+    selected_keys = simple_key
+    display(selected_keys, private_profile, raw_json_patient,raw_ob,raw_seq)
+
+
+
 if __name__ =='__main__':
-    ob_test()
+    retrive_test()
 
 
 

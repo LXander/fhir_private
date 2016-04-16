@@ -5,6 +5,7 @@ from forms import set_relative_info
 import jsonexample as jp
 import set_private as sp
 import private_extrace as pe
+import json
 
 @app.route('/index')
 def index():
@@ -72,6 +73,16 @@ def set_form():
         return render_template('temp.html',form= patient_info_form)
     return render_template('private_set.html',form = patient_info_form,patient_info = patient_info_class,observation = observation)
 
+@app.route('/display_test',methods=['GET','POST'])
+def display_result():
+    private_profile = json.dumps(jp.private_policy)
+    seq = json.dumps(jp.seq_ep)
+    raw_ob = json.dumps(jp.ob_ep)
+    raw_json_patient = json.dumps(jp.w)
+    raw_seq = [seq]
+    selected_keys = pe.simple_key + pe.complex_key
+    patient,observation = pe.display(selected_keys, private_profile, raw_json_patient,raw_ob,raw_seq)
+    return render_template('display_result.html',patient_info = patient,observation = observation)
 
 
 @app.route('/private_submit',methods=['GET','POST'])

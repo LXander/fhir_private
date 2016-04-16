@@ -8,6 +8,7 @@ import private_extrace as pe
 
 class LoginForm(Form):
     identifier= StringField('identifier', validators=[DataRequired(message=u'You must input patient\'s ID')])
+    disease = StringField('disease')
 
     #remember_me = BooleanField('address', default=False)
 
@@ -20,9 +21,11 @@ class Patient_from(Form):
 def set_relative_info(patient,observation,sequences):
     patient_info = pe.patient_info(patient)
 
+
     observation = pe.ob_info(observation)
-    for se in sequences:
-        observation.add_sequence(se)
+    if sequences:
+        for se in sequences:
+            observation.add_sequence(se)
 
     num = patient_info.field_num
 
