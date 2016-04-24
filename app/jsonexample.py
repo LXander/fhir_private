@@ -680,3 +680,67 @@ private_policy = json.loads(
 )
 
 example = simple
+
+read_p = json.loads(
+    '''
+    {
+    "name": {
+        "use": "official",
+        "given": "MARY 145",
+        "family": "SMITH"
+    },
+    "resourceType": "Patient",
+    "text": {
+        "status": "generated"
+    },
+    "birthDate": "1971-05-30T00:00:00-00:00",
+    "gender": "Female",
+    "id": "Patient/145"
+}
+    '''
+)
+
+read_ob = json.loads(
+    '''
+    {
+    "valueCodeableConcept": null,
+    "resourceType": "Observation",
+    "id": "Observation/2",
+    "extension": [
+        {
+            "url": "http://hl7.org/fhir/StructureDefinition/geneticsReferenceAllele"
+        },
+        {
+            "url": "http://hl7.org/fhir/StructureDefinition/geneticsObservedAllele"
+        },
+        {
+            "url": "http://hl7.org/fhir/StructureDefinition/geneticsAlleleName",
+            "valueCoding": {
+                "display": "5q11.2"
+            }
+        },
+        {
+            "url": "http://hl7.org/fhir/StructureDefinition/geneticsAssessedCondition",
+            "valueString": "Breast"
+        },
+        {
+            "url": "http://hl7.org/fhir/StructureDefinition/geneticsDNASequenceVariation",
+            "valueString": "amplification"
+        },
+        {
+            "url": "http://hl7.org/fhir/StructureDefinition/geneticsGeneId",
+            "valueCodeableConcept": {
+                "coding": {
+                    "code": "C6848",
+                    "system": "http://www.genenames.org",
+                    "display": "MAP3K1"
+                }
+            }
+        }
+    ],
+    "subject": {
+        "reference": "Patient/1"
+    }
+}
+    '''
+)

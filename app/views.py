@@ -1,29 +1,14 @@
 from flask import render_template, flash, redirect
 from app import app
 from forms import set_query_form
-from forms import set_relative_info
+from forms import set_relative_info,init_setting
 import jsonexample as jp
 import set_private as sp
 import private_extrace as pe
 import json
+import parser as pr
 
-@app.route('/index')
-def index():
-    user = {'nickname': 'Dear Doctor'}  # fake user
-    posts = [  # fake array of posts
-        { 
-            'author': {'nickname': 'John'}, 
-            'body': 'Beautiful day in Portland!' 
-        },
-        { 
-            'author': {'nickname': 'Susan'}, 
-            'body': 'The Avengers movie was so cool!' 
-        }
-    ]
-    return render_template("index.html",
-                           title='Home',
-                           user=user,
-                           posts=posts)
+
 
 
 @app.route('/')
@@ -38,7 +23,7 @@ def login():
                           title="Result",
                           form = form,keys = keys)
         #return redirect('/index')
-    return render_template('submit.html', 
+    return render_template('submit.html',
                            title='Submit',
                            form=form)
 
@@ -65,6 +50,8 @@ def set_form():
     e = jp.w
     o = jp.ob_ep
     s = jp.seq_ep
+    o = jp.read_ob
+    #e = jp.read_p
     patient_info_form,patient_info_class,observation = set_relative_info(e,o,[s])
     if patient_info_form.validate_on_submit():
 
@@ -84,6 +71,28 @@ def display_result():
     patient,observation = pe.display(selected_keys, private_profile, raw_json_patient,raw_ob,raw_seq)
     return render_template('display_result.html',patient_info = patient,observation = observation)
 
+@app.route('/rebuild_set',methods=['GET','POST'])
+def rebuild_set():
+    e = jp.w
+    e = jp.read_p
+
+    o = jp.ob_ep
+    o = jp.read_ob
+
+    s = jp.seq_ep
+    s = jp.seq_ep
+
+    form,patient,observation,sequences = init_setting(e,[o],[s])
+    if form.validate_on_submit():
+        pr.get_private_profile(form,patient,observation,sequences,e)
+        return render_template('temp.html',form=form)
+    return render_template('rebuild_set.html',form=form,patient_info=patient,observation = observation,sequences = sequences)
+
+
+
+@app.route('/masked_content')
+def masked_content_info():
+    return render_template('masked_content.html')
 
 @app.route('/private_submit',methods=['GET','POST'])
 def private_submit():

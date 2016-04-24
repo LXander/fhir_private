@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
     <h1>Hi,  Dear Doctor !</h1>
+    <p><a href="/masked_content"></a>link</p>
     <div>
     	You want to see the following item about the patient:
     	{% for item in form %}
@@ -25,4 +26,6 @@
         <p>Relative disease</p>
         <p>{{ form.disease.data }}</p>
         </div>
+
+
 {% endblock %}
