@@ -71,6 +71,17 @@ def display_result():
     patient,observation = pe.display(selected_keys, private_profile, raw_json_patient,raw_ob,raw_seq)
     return render_template('display_result.html',patient_info = patient,observation = observation)
 
+@app.route('/re_display',methods=['GET','POST'])
+def re_display():
+    private_profile = json.dumps(jp.private_policy)
+    seq = json.dumps(jp.seq_ep)
+    raw_ob = json.dumps(jp.ob_ep)
+    raw_json_patient = json.dumps(jp.w)
+    raw_seq = [seq]
+    selected_keys = pe.simple_key + pe.complex_key
+    patient,observation,sequences = pr.display(selected_keys, private_profile, raw_json_patient,raw_ob,raw_seq)
+    return render_template('rebuild_show.html',patient_info = patient,observation = observation,sequences = sequences)
+
 @app.route('/rebuild_set',methods=['GET','POST'])
 def rebuild_set():
     e = jp.w
